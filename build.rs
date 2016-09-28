@@ -9,6 +9,7 @@ pub fn main() {
     let mut file = Box::new(File::create(OUT_FILE).expect("Unable to write outfile"));
     write!(&mut file, "pub mod ffi {{").unwrap();
 
+    // hard coded library path
     let mut builder =  bindgen::Builder::new("/usr/include/libinput.h");
     builder.link("input", bindgen::LinkType::Dynamic);
     builder.link("udev", bindgen::LinkType::Dynamic);
