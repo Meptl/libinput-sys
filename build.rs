@@ -7,7 +7,7 @@ const OUT_FILE: &'static str = concat!(env!("OUT_DIR"), "/libinput-sys.rs");
 
 pub fn main() {
     let mut file = Box::new(File::create(OUT_FILE).expect("Unable to write outfile"));
-    write!(&mut file, "pub mod ffi {{").unwrap();
+    write!(&mut file, "mod ffi {{").unwrap();
 
     // hard coded library path
     let mut builder =  bindgen::Builder::new("/usr/include/libinput.h");
