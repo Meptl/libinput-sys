@@ -1,25 +1,21 @@
 extern crate bindgen;
 
-use std::fs::File;
-use std::io::Write;
-
-const OUT_FILE: &'static str = concat!(env!("OUT_DIR"), "/libinput-sys.rs");
+use std::env;
+use std::path::PathBuf;
 
 pub fn main() {
-    let mut file = Box::new(File::create(OUT_FILE).expect("Unable to write outfile"));
-    write!(&mut file, "mod ffi {{").unwrap();
+    // Tell cargo to tell rustc to link the system bzip2 shared library.
+    println!("cargo:rustc-link-lib=input");
+    println!("cargo:rustc-link-lib=udev");
 
-    // hard coded library path
-    let mut builder =  bindgen::Builder::new("/usr/include/libinput.h");
-    builder.link("input", bindgen::LinkType::Dynamic);
-    builder.link("udev", bindgen::LinkType::Dynamic);
-    builder.builtins();
+    let bindings = bindgen::Builder::default()
+        .no_unstable_rust()
+        .header("wrapper.h")
+        .emit_builtins()
+        .generate()
+        .expect("Unable to generate bindings.");
 
-    let bindings = match builder.generate() {
-        Ok(b) => b.to_string(),
-        Err(e) => panic!(e)
-    };
-
-    file.write_all(bindings.into_bytes().as_slice()).expect("failed to write bindings");
-    write!(&mut file, "}}").unwrap();
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    bindings.write_to_file(out_path.join("libinput-sys.rs"))
+            .expect("Couldn't write bindings!");
 }
